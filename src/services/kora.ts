@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { auth } from '../providors/AuthProvidor';
+import { cache } from './cache';
 const url = import.meta.env.VITE_KORA_API_BASE_URL;
 export class Kora {
-  public static async getHome() {
-    if (!navigator.onLine) return null;
+  private static async _getHome() {
     try {
       const res = await axios.get(`${url}/home`);
       const home = res.data as Kora.Home | null;
@@ -12,16 +12,25 @@ export class Kora {
       return null;
     }
   }
-
-  public static async getAnime(id: string): Promise<Kora.Anime | null> {
+  public static async getHome() {
     if (!navigator.onLine) return null;
-
-    const res = await axios.get(`${url}/anime/${id}`);
-    return res.data as Kora.Anime | null;
+    return cache.dedupe(['home'], () => this._getHome());
   }
 
-  public static async getSource(id: string, num: string | number) {
+  public static async _getAnime(id: string): Promise<Kora.Anime | null> {
+    try {
+      const res = await axios.get(`${url}/anime/${id}`);
+      return res.data as Kora.Anime | null;
+    } catch {
+      return null;
+    }
+  }
+  public static async getAnime(id: string) {
     if (!navigator.onLine) return null;
+    return cache.dedupe(['anime', id], () => this._getAnime(id));
+  }
+
+  public static async _getSource(id: string, num: string | number) {
     try {
       const res = await axios.get(`${url}/anime/${id}/${num}`);
       const source = res.data as Kora.Source | null;
@@ -29,6 +38,10 @@ export class Kora {
     } catch {
       return null;
     }
+  }
+  public static async getSource(id: string, num: string | number) {
+    if (!navigator.onLine) return null;
+    return cache.dedupe(['source', id, String(num)], () => this._getSource(id, num));
   }
 
   public static async setEpisodeHistory(
@@ -169,9 +182,7 @@ export namespace Kora {
     };
   }
 
-  export interface Home {
-    recent: string[];
-  }
+  export type Home = Kora.Anime[];
 
   export type Immutable = Anime | Source | Home;
   export type Mutable = History;

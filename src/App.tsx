@@ -1,33 +1,57 @@
 import React, { useEffect } from 'react';
+import {
+  Navigate,
+  Route,
+  HashRouter as Router,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { auth, useAuth } from './providors/AuthProvidor';
 import { Kora } from './services/kora';
 function App() {
-  const { user } = useAuth();
+  const { user, state: authState } = useAuth();
+  const [state, setState] = React.useState<State>('loading');
 
   useEffect(() => {
-    if (user) {
-      Kora.getAnime('0008f5accfc1c462a995f8a7b938ee4556fa51c2831d4ae8479107e8b2566f7d')
-        .then((anime) => {
-          if (anime) {
-            console.log('Anime data:', anime);
-          } else {
-            console.error('Failed to fetch anime data.');
-          }
-        })
-        .catch((err) => {
-          console.error('Error fetching anime data:', err);
-        });
+    setState('loading');
+
+    const loadApp = async () => {
+      try {
+        // TODO: Add prefetching here.
+        setState('success');
+      } catch {
+        setState('error');
+      }
+    };
+
+    if (state == 'success') {
+      loadApp();
     }
-  }, [user]);
+  }, [authState]);
+
   return (
-    <div className="text-text p-4 flex flex-col gap-4 w-fit">
-      <p>Hello, {user?.name}</p>
-      <button className="text-left" onClick={auth.continueWithGoogle}>
-        Continue with Google
-      </button>
-      <button className="text-left" onClick={auth.signOut}>
-        Sign Out
-      </button>
+    <div className="bg-background text-text">
+      <div
+        className={`absolute inset-0 select-none transition-all duration-300 ${
+          state === 'loading' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <Loading />
+      </div>
+      {state === 'success' && }
+    </div>
+  );
+}
+
+function Loading() {
+  return (
+    <div>
+      <div className="absolute z-60 inset-0 backdrop-blur-3xl transition-all duration-300 bg-background flex flex-col items-center justify-center">
+        <div className="h-[15vh] flex items-center justify-center overflow-clip select-none">
+          <h1 className="text-text-light font-black !text-[20vh] -translate-y-[1.35vh]">Kora</h1>
+        </div>
+        <p className="text-[1.75vh] select-none">The best anime experience.</p>
+      </div>
     </div>
   );
 }
