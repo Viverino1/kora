@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+    default-src 'self';
+    img-src 'self' data: https:;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    connect-src 'self' http://localhost:6969 https://*.googleapis.com https://*.firebaseio.com https://securetoken.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com data:;
+    "
+    />
+  </head>
+  <body class="dark">
+    <div id="root" class="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>
