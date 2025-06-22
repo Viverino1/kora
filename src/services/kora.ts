@@ -4,6 +4,7 @@ import { cache } from './cache';
 const url = import.meta.env.VITE_KORA_API_BASE_URL;
 export class Kora {
   private static async _getHome() {
+    console.log('Fetching home from Kora API');
     try {
       const res = await axios.get(`${url}/home`);
       const home = res.data as Kora.Home | null;
@@ -14,10 +15,15 @@ export class Kora {
   }
   public static async getHome() {
     if (!navigator.onLine) return null;
-    return cache.dedupe(['home'], () => this._getHome());
+    const res = await cache.dedupe(['home'], () => this._getHome());
+    if (res) {
+      cache.set(['home'], res);
+    }
+    return res;
   }
 
   public static async _getAnime(id: string): Promise<Kora.Anime | null> {
+    console.log(`Fetching anime with ID ${id} from Kora API`);
     try {
       const res = await axios.get(`${url}/anime/${id}`);
       return res.data as Kora.Anime | null;
@@ -27,21 +33,30 @@ export class Kora {
   }
   public static async getAnime(id: string) {
     if (!navigator.onLine) return null;
-    return cache.dedupe(['anime', id], () => this._getAnime(id));
+    const res = await cache.dedupe(['anime', id], () => this._getAnime(id));
+    if (res) {
+      cache.set(['anime', id], res);
+    }
+    return res;
   }
 
-  public static async _getSource(id: string, num: string | number) {
+  public static async _getSource(id: string, epid: string) {
+    console.log(`Fetching source for anime ID ${id} and episode ID ${epid} from Kora API`);
     try {
-      const res = await axios.get(`${url}/anime/${id}/${num}`);
+      const res = await axios.get(`${url}/anime/${id}/${epid}`);
       const source = res.data as Kora.Source | null;
       return source;
     } catch {
       return null;
     }
   }
-  public static async getSource(id: string, num: string | number) {
+  public static async getSource(id: string, epid: string) {
     if (!navigator.onLine) return null;
-    return cache.dedupe(['source', id, String(num)], () => this._getSource(id, num));
+    const res = await cache.dedupe(['source', id, epid], () => this._getSource(id, epid));
+    if (res) {
+      cache.set(['source', id, epid], res);
+    }
+    return res;
   }
 
   public static async setEpisodeHistory(
@@ -73,8 +88,8 @@ export class Kora {
     }
   }
 
-  public static async getHistory() {
-    if (!navigator.onLine) return null;
+  private static async _getHistory() {
+    console.log('Fetching history from Kora API');
     try {
       const res = await axios.get(`${url}/history`, {
         headers: { Authorization: await auth.getHeader() }
@@ -84,6 +99,17 @@ export class Kora {
     } catch {
       return null;
     }
+  }
+
+  public static async getHistory() {
+    if (!navigator.onLine) return null;
+    const res = await this._getHistory();
+    if (res && res.length > 0) {
+      for (const item of res) {
+        //cache.set(['history', item.animeId, item.epid], item);
+      }
+    }
+    return res;
   }
 }
 
@@ -182,7 +208,7 @@ export namespace Kora {
     };
   }
 
-  export type Home = Kora.Anime[];
+  export type Home = string[];
 
   export type Immutable = Anime | Source | Home;
   export type Mutable = History;

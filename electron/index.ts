@@ -1,7 +1,6 @@
 import { join } from 'path';
 import { BrowserWindow, app, ipcMain, IpcMainEvent, screen } from 'electron';
 import isDev from 'electron-is-dev';
-import store from 'node-persist';
 import { startGoogleAuth } from './auth';
 
 function createWindow() {
@@ -61,7 +60,6 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  await store.init();
   createWindow();
 
   app.on('activate', () => {
@@ -92,22 +90,6 @@ ipcMain.on('toggle-fullscreen', () => {
 ipcMain.handle('is-fullscreen', () => {
   const win = BrowserWindow.getFocusedWindow();
   return win ? win.isFullScreen() : false;
-});
-
-ipcMain.on('store-set', async (_, key, value) => {
-  await store.setItem(key, value);
-});
-
-ipcMain.handle('store-get', async (_, key) => {
-  return await store.getItem(key);
-});
-
-ipcMain.on('store-delete', async (_, key) => {
-  await store.removeItem(key);
-});
-
-ipcMain.on('store-clear', async () => {
-  await store.clear();
 });
 
 ipcMain.handle('start-google-auth', async (_) => {

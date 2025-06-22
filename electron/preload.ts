@@ -28,15 +28,6 @@ const api = {
 
 contextBridge.exposeInMainWorld('api', api);
 
-const store = {
-  get: async (key: string) => await ipcRenderer.invoke('store-get', key),
-  set: (key: string, value: string) => ipcRenderer.send('store-set', key, value),
-  delete: (key: string) => ipcRenderer.send('store-delete', key),
-  clear: () => ipcRenderer.send('store-clear')
-};
-
-contextBridge.exposeInMainWorld('store', store);
-
 declare global {
   interface Window {
     electronAPI: {
@@ -45,6 +36,5 @@ declare global {
       invoke: (channel: string, ...args: any[]) => Promise<any>;
     };
     api: typeof api;
-    store: typeof store;
   }
 }

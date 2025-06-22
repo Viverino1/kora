@@ -22,10 +22,8 @@ export function listenForGoogleAuthToken(onUser: (user: FBU) => void, onError?: 
     try {
       const result = await signInWithCredential(fbauth, credential);
       onUser(result.user);
-      alert('Signed in with Google!');
     } catch (err) {
       if (onError) onError(err);
-      alert('Firebase sign-in failed.');
     }
   };
   window.electronAPI.on('google-auth-token', handler);

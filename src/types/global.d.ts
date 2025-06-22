@@ -5,3 +5,4 @@ interface User {
   name: string | null;
   pfp: string | null;
 }
+type Page = 'home' | 'anime' | 'watch';

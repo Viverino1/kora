@@ -6,8 +6,8 @@ import { BrowserWindow } from 'electron';
 import { OAuth2Client } from 'google-auth-library';
 
 // You should set these as environment variables for security in production
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const CLIENT_ID = '435707567871-9i61b2fnksitmlqk9ols75upuhn2pp4i.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
 const REDIRECT_URI = 'http://localhost:5000/auth-callback';
 
 const SCOPES = ['profile', 'email', 'openid'];
