@@ -4,7 +4,6 @@ import { cache } from './cache';
 const url = import.meta.env.VITE_KORA_API_BASE_URL;
 export class Kora {
   private static async _getHome() {
-    console.log('Fetching home from Kora API');
     try {
       const res = await axios.get(`${url}/home`);
       const home = res.data as Kora.Home | null;
@@ -14,7 +13,7 @@ export class Kora {
     }
   }
   public static async getHome() {
-    if (!navigator.onLine) return null;
+    if (!navigator.onLine) return cache.get(['home']) as Kora.Home | null;
     const res = await cache.dedupe(['home'], () => this._getHome());
     if (res) {
       cache.set(['home'], res);
@@ -23,7 +22,6 @@ export class Kora {
   }
 
   public static async _getAnime(id: string): Promise<Kora.Anime | null> {
-    console.log(`Fetching anime with ID ${id} from Kora API`);
     try {
       const res = await axios.get(`${url}/anime/${id}`);
       return res.data as Kora.Anime | null;
@@ -32,7 +30,7 @@ export class Kora {
     }
   }
   public static async getAnime(id: string) {
-    if (!navigator.onLine) return null;
+    if (!navigator.onLine) return cache.get(['anime', id]) as Kora.Anime | null;
     const res = await cache.dedupe(['anime', id], () => this._getAnime(id));
     if (res) {
       cache.set(['anime', id], res);
@@ -41,7 +39,6 @@ export class Kora {
   }
 
   public static async _getSource(id: string, epid: string) {
-    console.log(`Fetching source for anime ID ${id} and episode ID ${epid} from Kora API`);
     try {
       const res = await axios.get(`${url}/anime/${id}/${epid}`);
       const source = res.data as Kora.Source | null;
@@ -51,7 +48,7 @@ export class Kora {
     }
   }
   public static async getSource(id: string, epid: string) {
-    if (!navigator.onLine) return null;
+    if (!navigator.onLine) return cache.get(['source', id, epid]) as Kora.Source | null;
     const res = await cache.dedupe(['source', id, epid], () => this._getSource(id, epid));
     if (res) {
       cache.set(['source', id, epid], res);
@@ -66,6 +63,7 @@ export class Kora {
     duration: number
   ): Promise<number> {
     if (!navigator.onLine) return 404;
+
     try {
       if (!animeId || !epid || timestamp == null || duration == null) {
         return 400;
@@ -89,7 +87,6 @@ export class Kora {
   }
 
   private static async _getHistory() {
-    console.log('Fetching history from Kora API');
     try {
       const res = await axios.get(`${url}/history`, {
         headers: { Authorization: await auth.getHeader() }
@@ -104,10 +101,45 @@ export class Kora {
   public static async getHistory() {
     if (!navigator.onLine) return null;
     const res = await this._getHistory();
-    if (res && res.length > 0) {
-      for (const item of res) {
-        //cache.set(['history', item.animeId, item.epid], item);
+    return res;
+  }
+
+  private static async _getAllAnimeList() {
+    try {
+      const res = await axios.get(`${url}/anime`);
+      const list = res.data as { id: string; title: string }[] | null;
+      if (list) {
+        list.sort((a, b) => {
+          const normalize = (str: string) => {
+            // Replace special characters with '~', but keep numbers and letters
+            // We'll use three groups: letters, numbers, then special chars (as '~~')
+            return str
+              .split('')
+              .map((char) => {
+                if (/[a-zA-Z]/.test(char)) return 'a' + char.toLowerCase();
+                if (/[0-9]/.test(char)) return 'n' + char;
+                return 'z~'; // special chars go last
+              })
+              .join('');
+          };
+          const aNorm = normalize(a.title);
+          const bNorm = normalize(b.title);
+          if (aNorm < bNorm) return -1;
+          if (aNorm > bNorm) return 1;
+          return 0;
+        });
       }
+      return list;
+    } catch {
+      return null;
+    }
+  }
+
+  public static async getAllAnimeList() {
+    if (!navigator.onLine) return cache.get(['allAnimeList']) as { id: string; title: string }[] | null;
+    const res = await this._getAllAnimeList();
+    if (res) {
+      cache.set(['allAnimeList'], res);
     }
     return res;
   }
@@ -213,5 +245,5 @@ export namespace Kora {
   export type Immutable = Anime | Source | Home;
   export type Mutable = History;
   export type Any = Immutable | Mutable;
-  export type Type = 'anime' | 'source' | 'home' | 'history';
+  export type Type = 'anime' | 'source' | 'home' | 'history' | 'allAnimeList';
 }

@@ -16,6 +16,7 @@ function createWindow() {
     autoHideMenuBar: true,
     backgroundColor: '#000000',
     show: false,
+    frame: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,

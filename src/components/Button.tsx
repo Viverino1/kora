@@ -26,7 +26,7 @@ const Button = ({ children, variant = 'primary', className, ...props }: ButtonPr
 
   return (
     <button className={twMerge(baseStyles, variantStyles[variant], className)} {...buttonProps}>
-      {children}
+      <div className="flex justify-center items-center gap-2 select-none pointer-events-none">{children}</div>
     </button>
   );
 };

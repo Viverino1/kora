@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { cache, Keys } from '../services/cache';
 
-export default function useLoader<T>(keys: Keys, fetch: () => Promise<T>) {
-  const cachedData = useMemo(() => cache.get(keys), [JSON.stringify(keys)]);
+export default function useLoader<T>(keys: Keys, fetch: () => Promise<T | null>, fromCache?: () => T | null) {
+  const cachedData = useMemo(() => (fromCache ? fromCache() : cache.get(keys)), [JSON.stringify(keys)]);
   const [data, setData] = useState<T | null>(cachedData);
   const [state, setState] = useState<State>(cachedData ? 'success' : 'loading');
 
@@ -14,6 +14,7 @@ export default function useLoader<T>(keys: Keys, fetch: () => Promise<T>) {
         if (cancelled) return;
         if (JSON.stringify(res) !== JSON.stringify(cachedData)) {
           setData(res);
+          cache.set(keys, res);
         }
         setState('success');
       })
