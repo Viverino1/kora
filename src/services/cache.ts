@@ -52,9 +52,10 @@ class Cache {
     return this.memoryStore[key]?.data ?? (null as T | null);
   };
 
-  getAll = <T = any>(type: Kora.Type): T[] => {
+  getAll = <T = any>(arg: Kora.Type | Keys): T[] => {
+    const match = Array.isArray(arg) ? arg.join(':') : arg;
     return Object.entries(this.memoryStore)
-      .filter(([key]) => key.includes(type))
+      .filter(([key]) => key.includes(match))
       .map(([, entry]) => entry.data as T);
   };
 

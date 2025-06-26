@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import { useAuth } from './providors/AuthProvidor';
-import Home from './pages/Home';
 import Auth from './pages/Auth';
 import { cache } from './services/cache';
 import SideBar from './components/SideBar';
@@ -10,7 +9,7 @@ import Settings from './pages/Settings';
 import { getHome, mergeWatchHistory } from './lib/composer';
 import Watch from './pages/Watch';
 import { Kora } from './services/kora';
-import Search from './components/Search';
+import Home from './pages/home';
 function App() {
   const { user, state: authState } = useAuth();
   const [state, setState] = React.useState<State>('loading');

@@ -5,7 +5,9 @@ export async function getHome() {
   const home = await Kora.getHome();
   if (!home) return null;
 
-  const continueWatching: string[] = [];
+  const allHistory = cache.getAll<Kora.History>('history');
+  allHistory.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+  const continueWatching = Array.from(new Set(allHistory.map((h) => h.animeId)));
 
   const unique = Array.from(new Set([...continueWatching, ...home]));
   const filtered: string[] = [];
@@ -26,8 +28,9 @@ export async function getHome() {
 export function getHomeFromCache() {
   const home = cache.get<Kora.Home>(['home']) ?? [];
 
-  const continueWatching: string[] = [];
-
+  const allHistory = cache.getAll<Kora.History>('history');
+  allHistory.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+  const continueWatching = Array.from(new Set(allHistory.map((h) => h.animeId)));
   const unique = Array.from(new Set([...continueWatching, ...home]));
   const filtered: string[] = [];
   for (const id of unique) {
@@ -94,15 +97,10 @@ export async function mergeWatchHistory() {
 
   for (const h of merged) {
     cache.set(['history', h.animeId, h.epid], h);
-    console.log(`Setting history for animeId: ${h.animeId}, epid: ${h.epid}`);
   }
 
   // Update remote server with changed entries, one at a time
   for (const h of changed) {
     await Kora.setEpisodeHistory(h.animeId, h.epid, h.lastTimeStamp, h.duration);
   }
-
-  console.log(
-    `Merged ${remote.length} remote histories with ${local.length} local histories, resulting in ${merged.length} total histories.`
-  );
 }

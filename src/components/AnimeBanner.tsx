@@ -5,7 +5,8 @@ import Button from './Button';
 import { LuBookmark } from 'react-icons/lu';
 import { PiPlayFill } from 'react-icons/pi';
 import { useOnlineStatus } from '../providors/OnlineStatusProvidor';
-
+import { cache } from '../services/cache';
+import { getMostRecentlyWatchedEpisode } from '../lib/utils';
 function TrailerOrPosterBackground({
   ytid,
   poster,
@@ -51,9 +52,23 @@ function TrailerOrPosterBackground({
 }
 
 export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; children?: React.ReactNode }) {
-  const episode = anime.episodes[0];
+  const episode = getMostRecentlyWatchedEpisode(anime);
 
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!episode) return;
+    const handleEnter = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'Enter') {
+        navigate(`/anime/${anime.id}`);
+      } else if (e.key === 'Enter') {
+        navigate(`/watch/${anime.id}/${episode.id}`);
+      }
+    };
+    window.addEventListener('keydown', handleEnter);
+    return () => window.removeEventListener('keydown', handleEnter);
+  }, [episode?.id, navigate]);
+
   return (
     <div className={`h-full flex flex-col justify-end pb-14 relative w-3/5 transition-all duration-300`}>
       <TrailerOrPosterBackground ytid={anime.trailer.ytid} poster={anime.poster} disableTrailer />

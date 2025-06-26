@@ -21,6 +21,18 @@ export default function Home() {
     return <div>Error loading data</div>;
   }
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        setActive((prev) => (prev + 1) % anime.length);
+      } else if (e.key === 'ArrowLeft') {
+        setActive((prev) => (prev - 1 + anime.length) % anime.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [anime.length]);
+
   return (
     <div className="w-full h-full overflow-clip flex flex-col px-14 py-4">
       <AnimeBanner anime={cache.get(['anime', anime[active]])!}>
@@ -29,9 +41,6 @@ export default function Home() {
         </Button>
       </AnimeBanner>
       <div className="relative">
-        <div className="w-full flex justify-between items-end pb-2 opacity-0">
-          <h3>Continue Watching</h3>
-        </div>
         <div className="h-fit flex gap-4">
           {anime.map((a, i) => (
             <AnimeCard

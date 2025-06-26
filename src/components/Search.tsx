@@ -49,13 +49,6 @@ export default function Search() {
         e.preventDefault();
         setActive((prev) => (prev - 1 + results.length) % results.length);
       }
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (results[active]?.id) {
-          navigate(`/anime/${results[active].id}`);
-          setShow(false);
-        }
-      }
       if (e.key === 'Escape') {
         e.preventDefault();
         setShow(false);
@@ -64,22 +57,20 @@ export default function Search() {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [show]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && show && results[active]?.id) {
         e.preventDefault();
-        if (results[active]?.id) {
-          navigate(`/anime/${results[active].id}`);
-          setShow(false);
-        }
+        navigate(`/anime/${results[active].id}`);
+        setShow(false);
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [active, results]);
+  }, [active, results, show]);
 
   // Focus input and insert key if not focused
   useEffect(() => {
