@@ -666,9 +666,6 @@ function Seekbar({
       if (currentTime < episode[type].start - COUNTDOWN_LENGTH || currentTime > episode[type].end) return null;
       const targetTime = episode[type].start;
       const remainingTime = (targetTime - currentTime).toFixed(0);
-      if (type === 'outro') {
-        console.log(remainingTime, 'outro countdown');
-      }
       return parseInt(remainingTime);
     };
 
@@ -770,6 +767,9 @@ function SkipButton({
   children: React.ReactNode;
 }) {
   const hasSkipped = useRef<boolean>(hasSkippedProp);
+  useEffect(() => {
+    hasSkipped.current = hasSkippedProp;
+  }, [hasSkippedProp]);
 
   if (autoSkip && countdown && countdown < 0 && !hasSkipped.current) {
     onSkip?.();

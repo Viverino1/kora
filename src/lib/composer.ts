@@ -94,10 +94,15 @@ export async function mergeWatchHistory() {
 
   for (const h of merged) {
     cache.set(['history', h.animeId, h.epid], h);
+    console.log(`Setting history for animeId: ${h.animeId}, epid: ${h.epid}`);
   }
 
   // Update remote server with changed entries, one at a time
   for (const h of changed) {
     await Kora.setEpisodeHistory(h.animeId, h.epid, h.lastTimeStamp, h.duration);
   }
+
+  console.log(
+    `Merged ${remote.length} remote histories with ${local.length} local histories, resulting in ${merged.length} total histories.`
+  );
 }

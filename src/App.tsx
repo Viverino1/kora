@@ -25,17 +25,21 @@ function App() {
 
     const loadApp = async () => {
       await Kora.getAllAnimeList();
-      setLoadingMessage('Loading cache...');
-      setLoadingProgress(60);
+      setLoadingMessage('Loading anime...');
+      setLoadingProgress(20);
+
       await cache.init();
-      setLoadingMessage('Loading watch history...');
-      setLoadingProgress(80);
+      setLoadingMessage('Loading cache...');
+      setLoadingProgress(40);
 
       await mergeWatchHistory();
+      setLoadingMessage('Loading watch history...');
+      setLoadingProgress(60);
 
-      setLoadingMessage('Loading home...');
-      setLoadingProgress(90);
       await cache.prefetch(['/', 'home'], getHome);
+      setLoadingMessage('Loading home...');
+      setLoadingProgress(80);
+
       setLoadingMessage('Finalizing...');
       setLoadingProgress(100);
     };
