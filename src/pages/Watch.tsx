@@ -527,7 +527,7 @@ function Volume({ video }: { video: HTMLVideoElement }) {
 
 const AUTO_SKIP_INTRO = true;
 const AUTO_SKIP_OUTRO = true;
-const COUNTDOWN_LENGTH = 10;
+const COUNTDOWN_LENGTH = 5;
 
 function Seekbar({
   video,
@@ -678,7 +678,7 @@ function Seekbar({
 
   return (
     <>
-      <div className={`absolute right-0 bottom-6 flex gap-4`}>
+      <div className={`absolute right-0 bottom-6`}>
         <SkipButton
           autoSkip={AUTO_SKIP_INTRO}
           countdown={introCountdown}
@@ -699,6 +699,8 @@ function Seekbar({
         >
           Skip Intro
         </SkipButton>
+      </div>
+      <div className="absolute right-0 bottom-6">
         <SkipButton
           autoSkip={AUTO_SKIP_OUTRO}
           countdown={outroCountdown}
@@ -781,8 +783,8 @@ function SkipButton({
         hasSkipped.current = true;
       }}
       className={`${
-        countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100' : 'opacity-0 w-0'
-      } transition-all duration-300 flex items-center justify-center overflow-clip whitespace-nowrap`}
+        countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100' : 'opacity-0'
+      } transition-all duration-300`}
     >
       {children} {autoSkip && countdown && countdown >= 0 ? `(${countdown}s)` : ''}
     </Button>
