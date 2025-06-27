@@ -8,7 +8,7 @@ import { OAuth2Client } from 'google-auth-library';
 // You should set these as environment variables for security in production
 const CLIENT_ID = '435707567871-9i61b2fnksitmlqk9ols75upuhn2pp4i.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
-const REDIRECT_URI = 'http://localhost:5000/auth-callback';
+const REDIRECT_URI = 'http://localhost:42813/auth-callback';
 
 const SCOPES = ['profile', 'email', 'openid'];
 
@@ -40,7 +40,7 @@ export function startGoogleAuth(mainWindow: BrowserWindow) {
     server.close();
   });
 
-  const server = app.listen(5000, async () => {
+  const server = app.listen(42813, async () => {
     const url = oAuth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: SCOPES,

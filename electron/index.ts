@@ -16,7 +16,6 @@ function createWindow() {
     autoHideMenuBar: true,
     backgroundColor: '#000000',
     show: false,
-    frame: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -24,6 +23,9 @@ function createWindow() {
       devTools: true
     }
   });
+
+  window.setMenu(null);
+  window.setTitle('Kora');
 
   const port = process.env.VITE_DEV_PORT || 3000;
   const url = isDev ? `http://localhost:${port}` : join(__dirname, '../dist-vite/index.html');

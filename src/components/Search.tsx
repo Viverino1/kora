@@ -4,6 +4,7 @@ import useLoader from '../hooks/useLoader';
 import { Kora } from '../services/kora';
 import { useNavigate } from 'react-router-dom';
 import { cache } from '../services/cache';
+import { stop } from '../lib/utils';
 
 const RESULTS_LIMIT = 12;
 const SHOW_LIMIT = 6;
@@ -36,21 +37,21 @@ export default function Search() {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'tab') {
-        e.preventDefault();
+        stop(e);
         setShow((prev) => !prev);
         return;
       }
       if (results.length <= 0) return;
       if (e.key === 'ArrowDown') {
-        e.preventDefault();
+        stop(e);
         setActive((prev) => (prev + 1) % results.length);
       }
       if (e.key === 'ArrowUp') {
-        e.preventDefault();
+        stop(e);
         setActive((prev) => (prev - 1 + results.length) % results.length);
       }
       if (e.key === 'Escape') {
-        e.preventDefault();
+        stop(e);
         setShow(false);
       }
     };
@@ -62,15 +63,16 @@ export default function Search() {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && show && results[active]?.id) {
-        e.preventDefault();
-        navigate(`/anime/${results[active].id}`);
+        stop(e);
+        const route = `/anime/${results[active].id}`;
+        console.log(`Navigating to: ${results[active].title}`);
         setShow(false);
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [active, results, show]);
+  }, [active, results, show, navigate]);
 
   // Focus input and insert key if not focused
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function Search() {
           setTimeout(() => {
             input.setSelectionRange(start + 1, start + 1);
           }, 0);
-          e.preventDefault();
+          stop(e);
         }
         if (e.key === 'Backspace') {
           const start = input.selectionStart || 0;
@@ -112,7 +114,7 @@ export default function Search() {
           setTimeout(() => {
             input.setSelectionRange(newPos, newPos);
           }, 0);
-          e.preventDefault();
+          stop(e);
         }
       }
     };
