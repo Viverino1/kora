@@ -22,11 +22,18 @@ export async function getHome() {
     if (filtered.length >= 7) break;
   }
 
-  return filtered.slice(0, 7);
+  const ids = filtered.slice(0, 7);
+
+  for (const id of ids) {
+    cache.prefetch(['anime', id], () => Kora.getAnime(id));
+  }
+
+  return ids;
 }
 
 export function getHomeFromCache() {
-  const home = cache.get<Kora.Home>(['home']) ?? [];
+  const home = cache.get<Kora.Home>(['home']);
+  if (!home) return null;
 
   const allHistory = cache.getAll<Kora.History>('history');
   allHistory.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());

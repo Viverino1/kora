@@ -6,10 +6,11 @@ import { cache } from './services/cache';
 import SideBar from './components/SideBar';
 import Anime from './pages/Anime';
 import Settings from './pages/Settings';
-import { getHome, mergeWatchHistory } from './lib/composer';
+import { getHome, getHomeFromCache, mergeWatchHistory } from './lib/composer';
 import Watch from './pages/Watch';
 import { Kora } from './services/kora';
 import Home from './pages/home';
+import Downloads from './pages/Downloads';
 function App() {
   const { user, state: authState } = useAuth();
   const [state, setState] = React.useState<State>('loading');
@@ -40,9 +41,8 @@ function App() {
       setLoadingProgress(60);
 
       setLoadingMessage('Loading home...');
-      if (!cache.get(['home'])) {
-        await cache.prefetch(['/', 'home'], getHome)
-      }
+      const cached = getHomeFromCache();
+      if (!cached) await getHome();
       setLoadingProgress(80);
 
       setLoadingProgress(100);
@@ -112,6 +112,7 @@ function AppContent({ user }: { user: User | null }) {
             <Route path="/" element={<Home />} />
             <Route path="/anime/:id" element={<Anime />} />
             <Route path="/watch/:id/:epid" element={<Watch />} />
+            <Route path="/downloads" element={<Downloads />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useLoader from '../hooks/useLoader';
 import AnimeBanner from '../components/AnimeBanner';
 import AnimeCard from '../components/AnimeCard';
@@ -34,7 +34,7 @@ export default function Home() {
   }, [anime.length]);
 
   return (
-    <div className="w-full h-full overflow-clip flex flex-col px-14 py-4">
+    <div className="w-full h-full overflow-clip flex flex-col px-14 py-6">
       <AnimeBanner anime={cache.get(['anime', anime[active]])!}>
         <Button onClick={() => navigate(`/anime/${anime[active]}`)} variant="secondary" className="pl-3 space-x-2">
           <PiCardsThree size={18} /> <div>Episodes</div>

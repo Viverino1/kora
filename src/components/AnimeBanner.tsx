@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Kora } from '../services/kora';
 import React from 'react';
 import Button from './Button';
-import { LuBookmark } from 'react-icons/lu';
+import { LuBookmark, LuCloudDownload } from 'react-icons/lu';
 import { PiPlayFill } from 'react-icons/pi';
 import { useOnlineStatus } from '../providors/OnlineStatusProvidor';
 import { cache } from '../services/cache';
@@ -53,6 +53,10 @@ function TrailerOrPosterBackground({
 
 export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; children?: React.ReactNode }) {
   if (!anime) return;
+  return <AnimeBannerContent key={anime.id} anime={anime}>{children}</AnimeBannerContent>;
+}
+
+function AnimeBannerContent({ anime, children }: { anime: Kora.Anime; children?: React.ReactNode }) {
   const episode = getMostRecentlyWatchedEpisode(anime);
 
   const navigate = useNavigate();
@@ -98,7 +102,7 @@ export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; ch
           </Button>
           {children}
           <Button variant="icon">
-            <LuBookmark size={20} />
+            <LuCloudDownload size={20} />
           </Button>
         </div>
       </div>

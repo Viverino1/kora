@@ -14,7 +14,6 @@ const PAGE_SIZE = 8;
 export default function Anime() {
   const { id } = useParams<{ id: string; episode: string }>();
   if (!id) return <Navigate to="/" />;
-  console.log(id);
   return <AnimeContent key={id} id={id} />
 
 }
@@ -23,6 +22,15 @@ function AnimeContent({ id }: { id: string }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const navigate = useNavigate();
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        navigate('/');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   if (state === 'loading') {
     return <div>Loading...</div>;

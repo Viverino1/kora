@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosProgressEvent } from 'axios';
 import { auth } from '../providors/AuthProvidor';
 import { cache } from './cache';
 const url = import.meta.env.VITE_KORA_API_BASE_URL;
@@ -14,24 +14,31 @@ export class Kora {
   }
   public static async getHome() {
     if (!navigator.onLine) return cache.get(['home']) as Kora.Home | null;
-    const res = await cache.dedupe(['home'], () => this._getHome());
+    const res = await cache.dedupe(['home'], () => Kora._getHome());
     if (res) {
       cache.set(['home'], res);
     }
     return res;
   }
 
-  public static async _getAnime(id: string): Promise<Kora.Anime | null> {
+  public static async _getAnime(id: string, onDownloadProgress?: (total: number, current: number, percent: number) => void): Promise<Kora.Anime | null> {
     try {
-      const res = await axios.get(`${url}/anime/${id}`);
+      const res = await axios.get(`${url}/anime/${id}`, {
+        onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+          const total = progressEvent.total || 0;
+          const current = progressEvent.loaded;
+          const percent = current / total * 100;
+          onDownloadProgress?.(total, current, percent);
+        }
+      });
       return res.data as Kora.Anime | null;
     } catch {
       return null;
     }
   }
-  public static async getAnime(id: string) {
+  public static async getAnime(id: string, onDownloadProgress?: (total: number, current: number, percent: number) => void) {
     if (!navigator.onLine) return cache.get(['anime', id]) as Kora.Anime | null;
-    const res = await cache.dedupe(['anime', id], () => this._getAnime(id));
+    const res = await cache.dedupe(['anime', id], () => Kora._getAnime(id, onDownloadProgress));
     if (res) {
       cache.set(['anime', id], res);
     }
@@ -49,7 +56,7 @@ export class Kora {
   }
   public static async getSource(id: string, epid: string) {
     if (!navigator.onLine) return cache.get(['source', id, epid]) as Kora.Source | null;
-    const res = await cache.dedupe(['source', id, epid], () => this._getSource(id, epid));
+    const res = await cache.dedupe(['source', id, epid], () => Kora._getSource(id, epid));
     if (res) {
       cache.set(['source', id, epid], res);
     }
@@ -100,7 +107,7 @@ export class Kora {
 
   public static async getHistory() {
     if (!navigator.onLine) return null;
-    const res = await this._getHistory();
+    const res = await Kora._getHistory();
     return res;
   }
 
@@ -137,7 +144,7 @@ export class Kora {
 
   public static async getAllAnimeList() {
     if (!navigator.onLine) return cache.get(['allAnimeList']) as { id: string; title: string }[] | null;
-    const res = await this._getAllAnimeList();
+    const res = await Kora._getAllAnimeList();
     if (res) {
       cache.set(['allAnimeList'], res);
     }
