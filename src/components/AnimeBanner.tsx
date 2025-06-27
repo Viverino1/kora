@@ -52,6 +52,7 @@ function TrailerOrPosterBackground({
 }
 
 export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; children?: React.ReactNode }) {
+  if (!anime) return;
   const episode = getMostRecentlyWatchedEpisode(anime);
 
   const navigate = useNavigate();

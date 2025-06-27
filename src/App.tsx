@@ -23,24 +23,30 @@ function App() {
     setLoadingProgress(0);
 
     const loadApp = async () => {
-      await Kora.getAllAnimeList();
-      setLoadingMessage('Loading anime...');
+      setLoadingMessage('Loading cache...');
+      await cache.init();
       setLoadingProgress(20);
 
-      await cache.init();
-      setLoadingMessage('Loading cache...');
+      setLoadingMessage('Loading anime...');
+      if (cache.get(['allAnimeList'])) {
+        Kora.getAllAnimeList();
+      } else {
+        await Kora.getAllAnimeList();
+      }
       setLoadingProgress(40);
 
-      await mergeWatchHistory();
       setLoadingMessage('Loading watch history...');
+      await mergeWatchHistory();
       setLoadingProgress(60);
 
-      await cache.prefetch(['/', 'home'], getHome);
       setLoadingMessage('Loading home...');
+      if (!cache.get(['home'])) {
+        await cache.prefetch(['/', 'home'], getHome)
+      }
       setLoadingProgress(80);
 
-      setLoadingMessage('Finalizing...');
       setLoadingProgress(100);
+      setLoadingMessage('Finalizing...');
     };
 
     if (authState == 'success') {
@@ -48,9 +54,11 @@ function App() {
         .then(() => {
           setState('success');
         })
-        .catch(() => {
+        .catch((e) => {
           setState('error');
         });
+    } else {
+      console.log("authState", authState);
     }
   }, [authState]);
 
@@ -71,9 +79,8 @@ function App() {
 function Loading({ state, msg, progress }: { state: State; msg: string; progress: number }) {
   return (
     <div
-      className={`absolute inset-0 select-none transition-all duration-300 ${
-        state === 'loading' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+      className={`absolute inset-0 select-none transition-all duration-300 ${state === 'loading' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
     >
       <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="h-[14.8vh] flex items-center justify-center overflow-clip select-none">

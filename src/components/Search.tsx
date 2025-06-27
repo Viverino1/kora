@@ -67,6 +67,7 @@ export default function Search() {
         const route = `/anime/${results[active].id}`;
         console.log(`Navigating to: ${results[active].title}`);
         setShow(false);
+        navigate(route);
       }
     };
 
@@ -143,15 +144,13 @@ export default function Search() {
   return (
     <div
       onClick={() => setShow(false)}
-      className={`absolute -translate-y-3 inset-0 w-screen h-screen flex flex-col items-center justify-center ${
-        show ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } transition-all duration-300 z-50 bg-background/50 backdrop-blur-md`}
+      className={`absolute -translate-y-3 inset-0 w-screen h-screen flex flex-col items-center justify-center ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } transition-all duration-300 z-50 bg-background/50 backdrop-blur-md`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`border w-[600px] rounded-xl bg-card/50 backdrop-blur-xl overflow-clip ${
-          show ? 'scale-100' : 'scale-95'
-        } transition-all duration-300`}
+        className={`border w-[600px] rounded-xl bg-card/50 backdrop-blur-xl overflow-clip ${show ? 'scale-100' : 'scale-95'
+          } transition-all duration-300`}
       >
         <div className="flex items-center border-b">
           <LuSearch

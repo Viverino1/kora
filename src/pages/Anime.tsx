@@ -8,13 +8,17 @@ import { LuChevronLeft, LuChevronRight, LuChevronsLeft, LuChevronsRight, LuX } f
 import AnimeBanner from '../components/AnimeBanner';
 import { paginate } from '../lib/utils';
 import Button from '../components/Button';
-import { useEffect } from 'react';
 
 const PAGE_SIZE = 8;
 
 export default function Anime() {
   const { id } = useParams<{ id: string; episode: string }>();
   if (!id) return <Navigate to="/" />;
+  console.log(id);
+  return <AnimeContent key={id} id={id} />
+
+}
+function AnimeContent({ id }: { id: string }) {
   const { data: anime, state } = useLoader(['anime', id], () => Kora.getAnime(id));
   const [currentPage, setCurrentPage] = useState(1);
 
