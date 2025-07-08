@@ -20,9 +20,8 @@ const CONTROLS_TIMEOUT = 5000; // milliseconds
 function Gradient({ shouldShowControls }: { shouldShowControls: boolean }) {
   return (
     <div
-      className={`z-10 pointer-events-none select-none absolute inset-0 h-full w-full flex flex-col justify-between transition-all duration-300 ${
-        shouldShowControls ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={`z-10 pointer-events-none select-none absolute inset-0 h-full w-full flex flex-col justify-between transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+        }`}
     >
       <div className=" bg-gradient-to-t from-background/30 to-background/90 h-64 w-full flex flex-col justify-end"></div>
       <div className="h-full w-full bg-background/30"></div>
@@ -83,11 +82,8 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
       // Configure buffering for more aggressive buffering
       playerRef.current.configure({
         streaming: {
-          bufferingGoal: 60, // Buffer 60 seconds ahead (default is 10)
-          rebufferingGoal: 10, // Start rebuffering when less than 10 seconds remain (default is 2)
-          bufferBehind: 30, // Keep 30 seconds of content behind current position (default is 30)
-          maxBuffers: 5, // Maximum number of buffered ranges (default is 3)
-          segmentPrefetchLimit: 2 // Prefetch 2 segments ahead (default is 0)
+          bufferingGoal: 60 * 60, // Buffer 60 minutes ahead (default is 10)
+          bufferBehind: 60 * 60, // Keep 60 minutes of content behind current position (default is 30)
         },
         // Optional: Increase retry attempts for failed segments
         manifest: {
@@ -232,7 +228,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
 
   return (
     <div onClick={handlePlayPause} className="h-screen w-screen select-none">
-      <video ref={videoRef} className="w-screen h-screen z-0"></video>
+      <video autoPlay ref={videoRef} className="w-screen h-screen z-0"></video>
 
       <Gradient shouldShowControls={shouldShowControls} />
 
@@ -241,18 +237,16 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           <button
             disabled={playerState !== 'success'}
             onClick={handleSeekBackward}
-            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-3 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${
-              shouldShowControls ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-3 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             <TbRewindBackward10 className="w-8 h-8" />
           </button>
           <button
             disabled={playerState !== 'success'}
             onClick={handlePlayPause}
-            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-5 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${
-              shouldShowControls ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-5 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             {playerState !== 'success' ? (
               <LuLoader className="w-16 h-16 animate-spin" style={{ animationDuration: '2s' }} />
@@ -265,9 +259,8 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           <button
             disabled={playerState !== 'success'}
             onClick={handleSeekForward}
-            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-3 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${
-              shouldShowControls ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`disabled:opacity-50 text-primary/80 border border-primary/50 rounded-full p-3 bg-primary/10 backdrop-blur-lg focus:!ring-0 transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             <TbRewindForward10 className="w-8 h-8" />
           </button>
@@ -300,9 +293,8 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           </div>
         </div>
         <button
-          className={`absolute top-14 left-14 z-30 rounded-full focus:!ring-0 transition-all duration-300 pointer-events-auto ${
-            shouldShowControls ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute top-14 left-14 z-30 rounded-full focus:!ring-0 transition-all duration-300 pointer-events-auto ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={(e) => {
             stop(e);
             navigate(`/anime/${id}`);
@@ -333,9 +325,8 @@ function Episodes({
   });
   return (
     <div
-      className={`absolute right-14 top-14 bottom-14 w-96 flex flex-col items-end justify-center translate-x-1/2 pointer-events-none transition-all duration-300 ${
-        shouldShowControls ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={`absolute right-14 top-14 bottom-14 w-96 flex flex-col items-end justify-center translate-x-1/2 pointer-events-none transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+        }`}
     >
       {eps.map((ep, i, arr) => {
         const dist = Math.abs(2 - i);
@@ -343,9 +334,8 @@ function Episodes({
         return (
           <button
             key={i}
-            className={`focus:!ring-0 pointer-events-auto flex flex-col flex-shrink-0 relative h-[20vh] aspect-video rounded-2xl shadow-2xl backdrop-blur-lg overflow-clip border-primary/50 border ${
-              ep == null && 'opacity-0 !cursor-default'
-            } ${i == middle && '!border-primary border-2'}`}
+            className={`focus:!ring-0 pointer-events-auto flex flex-col flex-shrink-0 relative h-[20vh] aspect-video rounded-2xl shadow-2xl backdrop-blur-lg overflow-clip border-primary/50 border ${ep == null && 'opacity-0 !cursor-default'
+              } ${i == middle && '!border-primary border-2'}`}
             onClick={(e) => {
               if (ep == null) return;
               e?.stopPropagation();
@@ -705,8 +695,10 @@ function Seekbar({
       return parseInt(remainingTime);
     };
 
-    setIntroCountdown(getCountdown('intro'));
-    setOutroCountdown(getCountdown('outro'));
+    const introCountdownValue = getCountdown('intro');
+    setIntroCountdown(introCountdownValue !== null ? introCountdownValue + 5 : null);
+    const outroCountdownValue = getCountdown('outro');
+    setOutroCountdown(outroCountdownValue !== null ? outroCountdownValue + 5 : null);
   }, [currentTime]);
 
   return (
@@ -722,10 +714,10 @@ function Seekbar({
           }}
           hasSkippedProp={
             startingHistory &&
-            episode &&
-            episode.intro &&
-            episode.intro.start &&
-            startingHistory.lastTimeStamp >= episode.intro.start
+              episode &&
+              episode.intro &&
+              episode.intro.start &&
+              startingHistory.lastTimeStamp >= episode.intro.start
               ? true
               : false
           }
@@ -745,10 +737,10 @@ function Seekbar({
           }}
           hasSkippedProp={
             startingHistory &&
-            episode &&
-            episode.outro &&
-            episode.outro.start &&
-            startingHistory.lastTimeStamp >= episode.outro.start
+              episode &&
+              episode.outro &&
+              episode.outro.start &&
+              startingHistory.lastTimeStamp >= episode.outro.start
               ? true
               : false
           }
@@ -761,9 +753,8 @@ function Seekbar({
         onClick={handleSeekBarClick}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-        className={`w-full h-8 flex items-center justify-center pointer-events-auto cursor-pointer transition-all duration-300 ${
-          shouldShowControls ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`w-full h-8 flex items-center justify-center pointer-events-auto cursor-pointer transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         <div className="h-2 w-full backdrop-blur-lg bg-primary/10 rounded-full border border-primary/20">
           <div
@@ -777,9 +768,8 @@ function Seekbar({
         </div>
       </div>
       <div
-        className={`flex translate-x-1.5 transition-all duration-300 ${
-          shouldShowControls ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`flex translate-x-1.5 transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         <div className="flex items-center justify-center w-14 pr-1 text-sm !font-mono">
           {video && video.duration && currentTime ? formatTime(video.duration - currentTime) : 'XX:XX'}
@@ -818,9 +808,8 @@ function SkipButton({
         onSkip?.();
         hasSkipped.current = true;
       }}
-      className={`${
-        countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      } transition-all duration-300`}
+      className={`${countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        } transition-all duration-300`}
     >
       {children} {autoSkip && countdown && countdown >= 0 ? `(${countdown}s)` : ''}
     </Button>
