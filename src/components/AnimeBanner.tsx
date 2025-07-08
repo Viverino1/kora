@@ -5,7 +5,6 @@ import Button from './Button';
 import { LuBookmark } from 'react-icons/lu';
 import { PiPlayFill } from 'react-icons/pi';
 import { useOnlineStatus } from '../providors/OnlineStatusProvidor';
-import { cache } from '../services/cache';
 import { getMostRecentlyWatchedEpisode } from '../lib/utils';
 function TrailerOrPosterBackground({
   ytid,
@@ -67,7 +66,7 @@ export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; ch
     };
     window.addEventListener('keydown', handleEnter);
     return () => window.removeEventListener('keydown', handleEnter);
-  }, [episode?.id, navigate]);
+  }, [anime.id, episode?.id, navigate]);
 
   return (
     <div className={`h-full flex flex-col justify-end pb-14 relative w-3/5 transition-all duration-300`}>
@@ -107,6 +106,6 @@ export default function AnimeBanner({ anime, children }: { anime: Kora.Anime; ch
 
 function parsePlayEp(ep: Kora.Episode): string {
   const isBasic = ep.title?.toLocaleLowerCase().includes(`episode ${ep.epStr}`);
-
-  return isBasic ? `Play ${ep.title}` : `Play EP${ep.epStr}: ${ep.title}`;
+  const str = isBasic ? `Play ${ep.title}` : `Play EP${ep.epStr}: ${ep.title}`;
+  return str.length > 50 ? str.slice(0, 50) + '...' : str;
 }

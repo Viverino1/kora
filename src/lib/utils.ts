@@ -40,3 +40,8 @@ export function getMostRecentlyWatchedEpisode(anime: Kora.Anime) {
 
   return hisEp ?? anime.episodes[0];
 }
+
+export function doesHaveHistory(id: string) {
+  const all = cache.getAll<Kora.History>(['history', id]);
+  return all.length > 0;
+}

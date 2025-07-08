@@ -4,14 +4,15 @@ import { Kora } from '../services/kora';
 import React, { useEffect, useRef, useState } from 'react';
 import { TbRewindBackward10, TbRewindForward10 } from 'react-icons/tb';
 import { IoArrowBack, IoPlay } from 'react-icons/io5';
-import { PiPauseFill } from 'react-icons/pi';
-import { LuPictureInPicture, LuVolume, LuVolume1, LuVolume2, LuVolumeOff } from 'react-icons/lu';
+import { PiPauseFill, PiSpinner } from 'react-icons/pi';
+import { LuLoader, LuPictureInPicture, LuVolume, LuVolume1, LuVolume2, LuVolumeOff } from 'react-icons/lu';
 
 // @ts-ignore shaka player is not typed, so we need to ignore it
 import shaka from 'shaka-player/dist/shaka-player.ui';
 import { formatTime, stop } from '../lib/utils';
 import { cache } from '../services/cache';
 import Button from '../components/Button';
+import EpisodeThumbnail from '../components/EpisodeThumbnail';
 
 const SEEK_LENGTH = 10; // seconds
 const CONTROLS_TIMEOUT = 5000; // milliseconds
@@ -60,6 +61,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
 
   const { data: anime, state: animeState } = useLoader(['anime', id], () => Kora.getAnime(id));
   const { data: episode, state: episodeState } = useLoader(['source', id, epid], () => Kora.getSource(id, epid));
+  console.log('episode', episode);
   const [playerState, setPlayerState] = useState<State>('loading');
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -76,6 +78,28 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
     if (videoRef.current && episode?.proxiedStreamUrl) {
       playerRef.current = new shaka.Player();
       playerRef.current.attach(videoRef.current);
+
+      // Configure buffering for more aggressive buffering
+      playerRef.current.configure({
+        streaming: {
+          bufferingGoal: 60, // Buffer 60 seconds ahead (default is 10)
+          rebufferingGoal: 10, // Start rebuffering when less than 10 seconds remain (default is 2)
+          bufferBehind: 30, // Keep 30 seconds of content behind current position (default is 30)
+          maxBuffers: 5, // Maximum number of buffered ranges (default is 3)
+          segmentPrefetchLimit: 2 // Prefetch 2 segments ahead (default is 0)
+        },
+        // Optional: Increase retry attempts for failed segments
+        manifest: {
+          retryParameters: {
+            maxAttempts: 5, // Retry failed segments up to 5 times
+            baseDelay: 1000, // Start with 1 second delay
+            backoffFactor: 2, // Double delay each retry
+            fuzzFactor: 0.5, // Add randomness to prevent thundering herd
+            timeout: 30000 // 30 second timeout per attempt
+          }
+        }
+      });
+
       playerRef.current
         .load(episode?.proxiedStreamUrl)
         .then(() => {
@@ -123,8 +147,10 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
   };
 
   const hideControls = () => {
-    setShouldShowControls(false);
-    document.body.style.cursor = 'none';
+    if (!videoRef.current?.paused) {
+      setShouldShowControls(false);
+      document.body.style.cursor = 'none';
+    }
   };
 
   async function handlePlayPause(e?: React.SyntheticEvent) {
@@ -159,7 +185,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
     if (e.code === 'Space') {
       handlePlayPause();
     } else if (e.code === 'Escape') {
-      navigate('/');
+      navigate(`/anime/${id}`);
     } else if (e.code === 'ArrowLeft') {
       handleSeekBackward();
     } else if (e.code === 'ArrowRight') {
@@ -207,7 +233,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
     <div onClick={handlePlayPause} className="h-screen w-screen select-none">
       <video ref={videoRef} className="w-screen h-screen z-0"></video>
 
-      <div className={`absolute inset-0 z-10 w-full h-full overflow-clip flex items-center justify-center`}>
+      <div className={`absolute inset-0 z-20 w-full h-full overflow-clip flex items-center justify-center`}>
         <div className="flex gap-12 items-center justify-center">
           <button
             disabled={playerState !== 'success'}
@@ -225,7 +251,13 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
               shouldShowControls ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {isPlaying ? <PiPauseFill className="w-16 h-16" /> : <IoPlay className="w-16 h-16 translate-x-[3px]" />}
+            {playerState !== 'success' ? (
+              <LuLoader className="w-16 h-16 animate-spin" style={{ animationDuration: '2s' }} />
+            ) : isPlaying ? (
+              <PiPauseFill className="w-16 h-16" />
+            ) : (
+              <IoPlay className="w-16 h-16 translate-x-[3px]" />
+            )}
           </button>
           <button
             disabled={playerState !== 'success'}
@@ -239,7 +271,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
         </div>
       </div>
 
-      <div className={`absolute inset-0 z-10 w-full h-full overflow-clip flex items-center justify-center`}>
+      <div className={`absolute inset-0 z-20 w-full h-full overflow-clip flex items-center justify-center`}>
         <Gradient shouldShowControls={shouldShowControls} />
         {anime && <Episodes shouldShowControls={shouldShowControls} anime={anime} epid={epid} />}
         <div className="absolute bottom-14 right-14 left-14">
@@ -269,12 +301,18 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           }`}
           onClick={(e) => {
             stop(e);
-            navigate('/');
+            navigate(`/anime/${id}`);
           }}
         >
           <IoArrowBack size={30} />
         </button>
       </div>
+
+      <div
+        className={`absolute inset-0 z-10 w-full h-full transition-all duration-300 ${
+          shouldShowControls ? 'bg-background/50' : ''
+        }`}
+      ></div>
     </div>
   );
 }
@@ -323,7 +361,7 @@ function Episodes({
               scale: `${1 - dist * 0.15}`
             }}
           >
-            <img src={ep?.thumbnail ?? undefined} alt="" />
+            <EpisodeThumbnail url={ep?.thumbnail ?? undefined} alt="" />
             <div className="w-full h-full absolute inset-0 bg-gradient-to-b from-transparent to-background/80 flex flex-col justify-end items-start p-4">
               <div className="flex items-center justify-start gap-[0.5vh] text-primary">
                 <span className="!text-[1.25vh]">{ep?.duration}m</span>
@@ -725,7 +763,7 @@ function Seekbar({
         onClick={handleSeekBarClick}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-        className={`w-full h-8 flex items-center justify-center pointer-events-auto transition-all duration-300 ${
+        className={`w-full h-8 flex items-center justify-center pointer-events-auto cursor-pointer transition-all duration-300 ${
           shouldShowControls ? 'opacity-100' : 'opacity-0'
         }`}
       >

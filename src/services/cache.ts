@@ -63,6 +63,19 @@ class Cache {
     this.memoryStore = {};
     const db = await this.dbPromise;
     await db.clear('keyval');
+    window.location.replace('/');
+  };
+
+  delete = async (keys: Keys): Promise<void> => {
+    const prefix = keys.join(':');
+    // Find all keys in memoryStore that start with the prefix
+    const keysToDelete = Object.keys(this.memoryStore).filter((key) => key.includes(prefix));
+    console.log('Deleting keys:', keysToDelete);
+    for (const key of keysToDelete) {
+      delete this.memoryStore[key];
+      const db = await this.dbPromise;
+      await db.delete('keyval', key);
+    }
   };
 
   getStore = () => this.memoryStore;

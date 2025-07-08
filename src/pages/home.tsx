@@ -7,11 +7,25 @@ import { PiCardsThree } from 'react-icons/pi';
 import Button from '../components/Button';
 import { cache } from '../services/cache';
 import { getHome, getHomeFromCache } from '../lib/composer';
+import { Kora } from '../services/kora';
+import { doesHaveHistory } from '../lib/utils';
 export default function Home() {
+  const [counter, setCounter] = React.useState<number>(0);
+  return <HomeContent key={counter} refresh={() => setCounter((prev) => prev + 1)} />;
+}
+
+function HomeContent({ refresh }: { refresh: () => void }) {
   const { data: anime, state } = useLoader(['/', 'home'], getHome, getHomeFromCache);
   const [active, setActive] = React.useState<number>(0);
 
   const navigate = useNavigate();
+
+  const handleClearHistory = async (animeId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    Kora.clearHistory(animeId);
+    await cache.delete(['history', animeId]);
+    refresh();
+  };
 
   if (state === 'loading') {
     return <div>Loading...</div>;
@@ -50,7 +64,9 @@ export default function Home() {
               onClick={() => {
                 setActive(i);
               }}
-            />
+            >
+              {doesHaveHistory(a) && <Button onClick={(e) => handleClearHistory(a, e)}>Clear History</Button>}
+            </AnimeCard>
           ))}
         </div>
       </div>

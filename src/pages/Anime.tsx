@@ -9,6 +9,7 @@ import AnimeBanner from '../components/AnimeBanner';
 import { paginate } from '../lib/utils';
 import Button from '../components/Button';
 import { useEffect } from 'react';
+import EpisodeThumbnail from '../components/EpisodeThumbnail';
 
 const PAGE_SIZE = 8;
 
@@ -19,6 +20,17 @@ export default function Anime() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   if (state === 'loading') {
     return <div>Loading...</div>;
@@ -43,7 +55,11 @@ export default function Anime() {
             className="rounded-lg overflow-clip relative border"
             onClick={() => navigate(`/watch/${anime.id}/${e.id}`)}
           >
-            <img className="aspect-[16/9] object-cover" alt={e.title ?? undefined} src={e.thumbnail ?? undefined}></img>
+            <EpisodeThumbnail
+              className="aspect-[16/9] object-cover"
+              alt={e.title ?? undefined}
+              url={e.thumbnail ?? undefined}
+            />
             <div className="absolute inset-0">
               <div className="h-full w-full bg-gradient-to-b from-transparent from-50% to-background/75"></div>
             </div>

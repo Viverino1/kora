@@ -4,13 +4,16 @@ import './styles/global.css';
 import App from './App';
 import { OnlineStatusProvider } from './providors/OnlineStatusProvidor';
 import { AuthProvider } from './providors/AuthProvidor';
+import { SearchProvider } from './providors/SearchProvidor';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <OnlineStatusProvider>
       <AuthProvider>
-        <App />
+        <SearchProvider>
+          <App />
+        </SearchProvider>
       </AuthProvider>
     </OnlineStatusProvider>
   </React.StrictMode>

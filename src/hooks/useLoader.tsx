@@ -25,7 +25,7 @@ export default function useLoader<T>(keys: Keys, fetch: () => Promise<T | null>,
       cancelled = true;
     };
     // eslint-disable-next-line
-  }, [JSON.stringify(keys)]);
+  }, [...keys]);
 
   return {
     data,

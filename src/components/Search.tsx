@@ -5,6 +5,7 @@ import { Kora } from '../services/kora';
 import { useNavigate } from 'react-router-dom';
 import { cache } from '../services/cache';
 import { stop } from '../lib/utils';
+import { useSearch } from '../providors/SearchProvidor';
 
 const RESULTS_LIMIT = 12;
 const SHOW_LIMIT = 6;
@@ -17,7 +18,12 @@ export default function Search() {
   );
   const navigate = useNavigate();
 
-  const [show, setShow] = React.useState<boolean>(false);
+  const { isSearchVisible: show, setSearchVisible: setShow, toggleSearch } = useSearch();
+
+  const handleSelect = (id: string) => {
+    navigate(`/anime/${id}`);
+    setShow(false);
+  };
 
   const [active, setActive] = React.useState<number>(0);
   const resultsRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -38,9 +44,22 @@ export default function Search() {
     const handler = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'tab') {
         stop(e);
-        setShow((prev) => !prev);
+        toggleSearch();
         return;
       }
+
+      // Only handle other keys when search modal is visible
+      if (!show) return;
+
+      if (e.key === 'Enter' && results.length > 0) {
+        stop(e);
+        const selectedResult = results[active];
+        if (selectedResult) {
+          handleSelect(selectedResult.id);
+        }
+        return;
+      }
+
       if (results.length <= 0) return;
       if (e.key === 'ArrowDown') {
         stop(e);
@@ -56,23 +75,9 @@ export default function Search() {
       }
     };
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [show]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && show && results[active]?.id) {
-        stop(e);
-        const route = `/anime/${results[active].id}`;
-        console.log(`Navigating to: ${results[active].title}`);
-        setShow(false);
-      }
-    };
-
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [active, results, show, navigate]);
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [show, results, active, navigate, toggleSearch, setShow]);
 
   // Focus input and insert key if not focused
   useEffect(() => {
@@ -184,6 +189,7 @@ export default function Search() {
                 id={item.id}
                 title={item.title}
                 isActive={i == active}
+                onSelect={handleSelect}
                 ref={(el) => (resultsRefs.current[i] = el)}
               />
             ))
@@ -194,13 +200,18 @@ export default function Search() {
   );
 }
 
-// Update SearchResult to forward ref
-const SearchResult = React.forwardRef<HTMLButtonElement, { id: string; title: string; isActive: boolean }>(
-  ({ id, title, isActive }, ref) => {
-    return (
-      <button ref={ref} className={`px-2 py-1 rounded-md text-left focus:ring-0 ${isActive ? 'bg-card/75' : ''}`}>
-        <p className="line-clamp-1">{title}</p>
-      </button>
-    );
-  }
-);
+// Update SearchResult to forward ref and handle clicks
+const SearchResult = React.forwardRef<
+  HTMLButtonElement,
+  { id: string; title: string; isActive: boolean; onSelect: (id: string) => void }
+>(({ id, title, isActive, onSelect }, ref) => {
+  return (
+    <button
+      ref={ref}
+      className={`px-2 py-1 rounded-md text-left focus:ring-0 ${isActive ? 'bg-card/75' : ''}`}
+      onClick={() => onSelect(id)}
+    >
+      <p className="line-clamp-1">{title}</p>
+    </button>
+  );
+});

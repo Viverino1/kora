@@ -143,6 +143,25 @@ export class Kora {
     }
     return res;
   }
+
+  public static async getImage(url: string, id: string, epid: string) {
+    const res = await axios.get(url);
+    const img = res.data as string | null;
+    await cache.set(['image', id, epid], img);
+    return img;
+  }
+
+  public static async clearHistory(id: string) {
+    if (!navigator.onLine) return 404;
+    try {
+      const res = await axios.delete(`${url}/history?animeid=${id}`, {
+        headers: { Authorization: await auth.getHeader() }
+      });
+      return res.status;
+    } catch {
+      return 500; // Internal Server Error
+    }
+  }
 }
 
 export namespace Kora {
@@ -245,5 +264,5 @@ export namespace Kora {
   export type Immutable = Anime | Source | Home;
   export type Mutable = History;
   export type Any = Immutable | Mutable;
-  export type Type = 'anime' | 'source' | 'home' | 'history' | 'allAnimeList';
+  export type Type = 'anime' | 'source' | 'home' | 'history' | 'allAnimeList' | 'image';
 }
