@@ -8,12 +8,13 @@
       http-equiv="Content-Security-Policy"
       content="
     default-src 'self';
+    script-src 'self' https://apis.google.com https://www.gstatic.com;
     img-src 'self' data: https: http://localhost:6969;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    connect-src 'self' http://localhost:6969 http://192.168.1.232:6969 https://*.googleapis.com https://*.firebaseio.com https://securetoken.googleapis.com;
+    connect-src 'self' http://localhost:6969 http://192.168.1.232:6969 https://*.googleapis.com https://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com;
     font-src 'self' https://fonts.gstatic.com data:;
     media-src 'self' blob:;
-    frame-src 'self' https://www.youtube.com;
+    frame-src 'self' https://www.youtube.com https://accounts.google.com https://*.firebaseapp.com https://kora3-electron.firebaseapp.com;
     "
     />
   </head>

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { fbauth, listenForGoogleAuthToken, FBU } from '../services/firebase';
+import { fbauth, listenForGoogleAuthToken, signInWithGoogleBrowser, isElectron, FBU } from '../services/firebase';
 
 class Auth {
   public user: User | null = null;
@@ -36,12 +36,34 @@ class Auth {
   }
 
   async continueWithGoogle() {
-    window.electronAPI.invoke('start-google-auth');
+    if (isElectron && window.electronAPI) {
+      // Use Electron's auth flow
+      try {
+        window.electronAPI.invoke('start-google-auth');
+      } catch (error) {
+        console.error('Electron Google auth failed:', error);
+        throw error;
+      }
+    } else if (!isElectron) {
+      // Use browser's popup auth flow only in actual browser environment
+      try {
+        const user = await signInWithGoogleBrowser();
+        this.setUser(user);
+      } catch (error) {
+        console.error('Google sign-in failed:', error);
+        throw error;
+      }
+    } else {
+      // We're in Electron but electronAPI is not available
+      console.error('Running in Electron but electronAPI is not available');
+      throw new Error('Authentication not available in this environment');
+    }
   }
 
   async signOut() {
     await fbauth.signOut();
     this.setUser(null);
+    window.location.reload();
   }
 
   async getHeader() {

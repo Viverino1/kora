@@ -20,12 +20,13 @@ const CONTROLS_TIMEOUT = 5000; // milliseconds
 function Gradient({ shouldShowControls }: { shouldShowControls: boolean }) {
   return (
     <div
-      className={`absolute inset-0 h-full w-full flex flex-col justify-between  pointer-events-none transition-all duration-300 ${
+      className={`z-10 pointer-events-none select-none absolute inset-0 h-full w-full flex flex-col justify-between transition-all duration-300 ${
         shouldShowControls ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div className=" bg-gradient-to-t from-transparent to-background/90 h-64 w-full flex flex-col justify-end"></div>
-      <div className=" bg-gradient-to-b from-transparent to-background/90 h-64 w-full flex flex-col justify-end"></div>
+      <div className=" bg-gradient-to-t from-background/30 to-background/90 h-64 w-full flex flex-col justify-end"></div>
+      <div className="h-full w-full bg-background/30"></div>
+      <div className=" bg-gradient-to-b from-background/30 to-background/90 h-64 w-full flex flex-col justify-end"></div>
     </div>
   );
 }
@@ -233,6 +234,8 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
     <div onClick={handlePlayPause} className="h-screen w-screen select-none">
       <video ref={videoRef} className="w-screen h-screen z-0"></video>
 
+      <Gradient shouldShowControls={shouldShowControls} />
+
       <div className={`absolute inset-0 z-20 w-full h-full overflow-clip flex items-center justify-center`}>
         <div className="flex gap-12 items-center justify-center">
           <button
@@ -271,10 +274,11 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
         </div>
       </div>
 
-      <div className={`absolute inset-0 z-20 w-full h-full overflow-clip flex items-center justify-center`}>
-        <Gradient shouldShowControls={shouldShowControls} />
+      <div
+        className={`absolute inset-0 z-20 w-full h-full overflow-clip flex items-center justify-center select-none pointer-events-none`}
+      >
         {anime && <Episodes shouldShowControls={shouldShowControls} anime={anime} epid={epid} />}
-        <div className="absolute bottom-14 right-14 left-14">
+        <div className="absolute bottom-14 right-14 left-14 z-20">
           <div className={`transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'}`}>
             <h1 className="pb-1 !text-4xl">{episode?.title}</h1>
             <p className="pb-8">{anime?.title}</p>
@@ -296,7 +300,7 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           </div>
         </div>
         <button
-          className={`absolute top-14 left-14 z-30 rounded-full focus:!ring-0 transition-all duration-300 ${
+          className={`absolute top-14 left-14 z-30 rounded-full focus:!ring-0 transition-all duration-300 pointer-events-auto ${
             shouldShowControls ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={(e) => {
@@ -307,12 +311,6 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
           <IoArrowBack size={30} />
         </button>
       </div>
-
-      <div
-        className={`absolute inset-0 z-10 w-full h-full transition-all duration-300 ${
-          shouldShowControls ? 'bg-background/50' : ''
-        }`}
-      ></div>
     </div>
   );
 }
@@ -821,7 +819,7 @@ function SkipButton({
         hasSkipped.current = true;
       }}
       className={`${
-        countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100' : 'opacity-0'
+        countdown && countdown <= COUNTDOWN_LENGTH ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       } transition-all duration-300`}
     >
       {children} {autoSkip && countdown && countdown >= 0 ? `(${countdown}s)` : ''}

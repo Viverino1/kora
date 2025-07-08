@@ -35,7 +35,8 @@ function App() {
       setLoadingMessage('Loading watch history...');
       setLoadingProgress(60);
 
-      await cache.prefetch(['/', 'home'], getHome);
+      const home = await cache.prefetch(['/', 'home'], getHome);
+      console.log('Home data loaded:', home);
       setLoadingMessage('Loading home...');
       setLoadingProgress(80);
 
