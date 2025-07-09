@@ -16,13 +16,17 @@ function App() {
 
   const [loadingMessage, setLoadingMessage] = React.useState<string>('Loading...');
   const [loadingProgress, setLoadingProgress] = React.useState<number>(0);
+  const [showLoadingUI, setShowLoadingUI] = React.useState<boolean>(false);
 
   useEffect(() => {
     setState('loading');
     setLoadingMessage('Loading auth...');
     setLoadingProgress(0);
+    setShowLoadingUI(false);
 
     const loadApp = async () => {
+      console.log('Starting app load...');
+      setShowLoadingUI(true);
       await Kora.getAllAnimeList();
       setLoadingMessage('Loading anime...');
       setLoadingProgress(20);
@@ -36,7 +40,6 @@ function App() {
       setLoadingProgress(60);
 
       const home = await cache.prefetch(['/', 'home'], getHome);
-      console.log('Home data loaded:', home);
       setLoadingMessage('Loading home...');
       setLoadingProgress(80);
 
@@ -45,19 +48,23 @@ function App() {
     };
 
     if (authState == 'success') {
-      loadApp()
-        .then(() => {
-          setState('success');
-        })
-        .catch(() => {
-          setState('error');
-        });
+      if (user) {
+        loadApp()
+          .then(() => {
+            setState('success');
+          })
+          .catch(() => {
+            setState('error');
+          });
+      } else {
+        setState('success');
+      }
     }
-  }, [authState]);
+  }, [authState, user]);
 
   return (
     <div className="bg-background text-text w-screen h-screen">
-      <Loading state={state} msg={loadingMessage} progress={loadingProgress} />
+      <Loading state={state} msg={loadingMessage} progress={loadingProgress} show={showLoadingUI} />
       {state === 'success' && (
         <Router>
           <div className="h-screen w-screen flex flex-col">
@@ -69,12 +76,11 @@ function App() {
   );
 }
 
-function Loading({ state, msg, progress }: { state: State; msg: string; progress: number }) {
+function Loading({ state, msg, progress, show }: { state: State; msg: string; progress: number, show: boolean }) {
   return (
     <div
-      className={`absolute inset-0 select-none transition-all duration-300 ${
-        state === 'loading' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+      className={`absolute inset-0 select-none transition-all duration-300 ${state === 'loading' && show ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
     >
       <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="h-[14.8vh] flex items-center justify-center overflow-clip select-none">

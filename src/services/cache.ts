@@ -63,7 +63,6 @@ class Cache {
     this.memoryStore = {};
     const db = await this.dbPromise;
     await db.clear('keyval');
-    window.location.replace('/');
   };
 
   delete = async (keys: Keys): Promise<void> => {
