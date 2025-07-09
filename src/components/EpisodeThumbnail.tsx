@@ -24,7 +24,7 @@ export default function EpisodeThumbnail({ url, ...imgProps }: EpisodeThumbnailP
 
   return (
     <div className="relative z-0">
-      <img src={src ?? undefined} alt="image" {...imgProps} onError={() => console.log('ERROR')} />
+      <img src={src ?? undefined} alt="image" {...imgProps} />
       {!src && <div className="absolute z-10 inset-0 bg-background"></div>}
       <div className={`transition-all duration-300 ${src || !url ? 'opacity-0' : 'opacity-100'}`}>
         <div className="absolute z-20 inset-0 bg-card/50 animate-pulse"></div>

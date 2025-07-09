@@ -25,7 +25,6 @@ function App() {
     setShowLoadingUI(false);
 
     const loadApp = async () => {
-      console.log('Starting app load...');
       setShowLoadingUI(true);
       await Kora.getAllAnimeList();
       setLoadingMessage('Loading anime...');

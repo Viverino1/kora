@@ -69,7 +69,6 @@ class Cache {
     const prefix = keys.join(':');
     // Find all keys in memoryStore that start with the prefix
     const keysToDelete = Object.keys(this.memoryStore).filter((key) => key.includes(prefix));
-    console.log('Deleting keys:', keysToDelete);
     for (const key of keysToDelete) {
       delete this.memoryStore[key];
       const db = await this.dbPromise;

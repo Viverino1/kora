@@ -6,7 +6,6 @@ import { TbRewindBackward10, TbRewindForward10 } from 'react-icons/tb';
 import { IoArrowBack, IoPlay } from 'react-icons/io5';
 import { PiPauseFill } from 'react-icons/pi';
 import { LuLoader, LuPictureInPicture, LuVolume, LuVolume1, LuVolume2, LuVolumeOff } from 'react-icons/lu';
-
 // @ts-ignore shaka player is not typed, so we need to ignore it
 import shaka from 'shaka-player/dist/shaka-player.ui';
 import { formatTime, stop } from '../lib/utils';
@@ -15,7 +14,13 @@ import Button from '../components/Button';
 import EpisodeThumbnail from '../components/EpisodeThumbnail';
 
 const SEEK_LENGTH = 10; // seconds
-const CONTROLS_TIMEOUT = 5000; // milliseconds
+const CONTROLS_TIMEOUT = 2000; // milliseconds
+
+const AUTO_SKIP_INTRO = true;
+const AUTO_SKIP_OUTRO = true;
+const COUNTDOWN_LENGTH = 5;
+
+const SKIP_PAST_INTRO = true
 
 const shakaConfig = {
   streaming: {
@@ -37,12 +42,11 @@ const shakaConfig = {
 function Gradient({ shouldShowControls }: { shouldShowControls: boolean }) {
   return (
     <div
-      className={`z-10 pointer-events-none select-none absolute inset-0 h-full w-full flex flex-col justify-between transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
+      className={`z-10 pointer-events-none select-none absolute inset-0 h-full w-full flex flex-col justify-between transition-all duration-300 bg-background/50 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
         }`}
     >
-      <div className=" bg-gradient-to-t from-background/30 to-background/90 h-64 w-full flex flex-col justify-end"></div>
-      <div className="h-full w-full bg-background/30"></div>
-      <div className=" bg-gradient-to-b from-background/30 to-background/90 h-64 w-full flex flex-col justify-end"></div>
+      <div className=" bg-gradient-to-t from-transparent to-background/90 h-64 w-full flex flex-col justify-end"></div>
+      <div className=" bg-gradient-to-b from-transparent to-background/90 h-64 w-full flex flex-col justify-end"></div>
     </div>
   );
 }
@@ -123,7 +127,11 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
         .then(() => {
           const cached = startingHistory.current;
           if (cached && cached.lastTimeStamp < videoRef.current!.duration) {
-            videoRef.current!.currentTime = cached.lastTimeStamp;
+            if (episode.intro.end && cached.lastTimeStamp < episode.intro.end && SKIP_PAST_INTRO) {
+              videoRef.current!.currentTime = episode.intro.end;
+            } else {
+              videoRef.current!.currentTime = cached.lastTimeStamp;
+            }
           }
           videoRef.current
             ?.play()
@@ -163,13 +171,11 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
 
   const showControls = () => {
     setShouldShowControls(true);
-    document.body.style.cursor = 'default';
   };
 
   const hideControls = () => {
     if (!videoRef.current?.paused) {
       setShouldShowControls(false);
-      document.body.style.cursor = 'none';
     }
   };
 
@@ -219,8 +225,14 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
     }
     timeoutId.current = null;
   };
+
+  const isFirstMouseMove = useRef(true);
+
   const handleMouseMove = () => {
-    console.log('Mouse moved');
+    if (isFirstMouseMove.current) {
+      isFirstMouseMove.current = false;
+      return;
+    }
     showControls();
     if (!videoRef.current) return;
     if (!timeoutId.current && !videoRef.current.paused) {
@@ -246,12 +258,15 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
         clearTimeout(timeoutId.current);
         timeoutId.current = null;
       }
-      document.body.style.cursor = 'default';
     };
   }, []);
 
   return (
-    <div onClick={handlePlayPause} className="h-screen w-screen select-none">
+    <div
+      onClick={handlePlayPause}
+      className={`h-screen w-screen select-none ${shouldShowControls ? 'cursor-default' : 'cursor-none'}`}
+      style={{ cursor: shouldShowControls ? 'default' : 'none' }}
+    >
       <video autoPlay ref={videoRef} className="w-screen h-screen z-0"></video>
       <video muted ref={nextVideoRef} className="w-[50vw] h-[50vh] absolute top-0 left-0 z-50 pointer-events-none opacity-0"></video>
 
@@ -575,10 +590,6 @@ function Volume({ video }: { video: HTMLVideoElement }) {
     </button>
   );
 }
-
-const AUTO_SKIP_INTRO = true;
-const AUTO_SKIP_OUTRO = true;
-const COUNTDOWN_LENGTH = 5;
 
 function Seekbar({
   video,
