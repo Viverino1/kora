@@ -792,15 +792,40 @@ function Seekbar({
         className={`w-full h-8 flex items-center justify-center pointer-events-auto cursor-pointer transition-all duration-300 ${shouldShowControls ? 'opacity-100' : 'opacity-0'
           }`}
       >
-        <div className="h-2 w-full backdrop-blur-lg bg-primary/10 rounded-full border border-primary/20">
+        <div className="relative h-2 w-full backdrop-blur-lg bg-primary/10 rounded-full border border-primary/20">
+          {/* Buffered progress */}
           <div
             style={{ width: !video ? 0 : `${(bufferedTime / video.duration) * 100}%` }}
             className="absolute w-1/2 h-full bg-primary/20 rounded-full"
           ></div>
+
+          {/* Current progress */}
           <div
             style={{ width: !video ? 0 : `${(currentTime / video.duration) * 100}%` }}
             className="absolute h-full bg-primary/80 rounded-full"
           ></div>
+
+          {/* Intro section indicator */}
+          {video && episode && episode.intro && episode.intro.start !== undefined && episode.intro.end !== undefined && episode.intro.start !== null && episode.intro.end !== null && episode.intro.end > episode.intro.start && (
+            <div
+              className="absolute h-2.5 bg-red-500/50 rounded-full pointer-events-none border border-2 border-red-500 -translate-y-[2px] z-10"
+              style={{
+                left: `${(episode.intro.start! / video.duration) * 100}%`,
+                width: `${((episode.intro.end! - episode.intro.start!) / video.duration) * 100}%`
+              }}
+            />
+          )}
+
+          {/* Outro section indicator */}
+          {video && episode && episode.outro && episode.outro.start !== undefined && episode.outro.end !== undefined && episode.outro.start !== null && episode.outro.end !== null && episode.outro.end > episode.outro.start && (
+            <div
+              className="absolute h-2.5 bg-red-500/50 rounded-full pointer-events-none border border-2 border-red-500 -translate-y-[2px] z-10"
+              style={{
+                left: `${(episode.outro.start! / video.duration) * 100}%`,
+                width: `${((episode.outro.end! - episode.outro.start!) / video.duration) * 100}%`
+              }}
+            />
+          )}
         </div>
       </div>
       <div
