@@ -126,12 +126,11 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
         .load(episode?.proxiedStreamUrl)
         .then(() => {
           const cached = startingHistory.current;
-          if (cached && cached.lastTimeStamp < videoRef.current!.duration) {
-            if (episode.intro.end && cached.lastTimeStamp < episode.intro.end && SKIP_PAST_INTRO) {
-              videoRef.current!.currentTime = episode.intro.end;
-            } else {
-              videoRef.current!.currentTime = cached.lastTimeStamp;
-            }
+          const cachedTimestamp = cached?.lastTimeStamp ?? 0;
+          if (episode.intro.end && cachedTimestamp < episode.intro.end && SKIP_PAST_INTRO) {
+            videoRef.current!.currentTime = episode.intro.end;
+          } else if (cachedTimestamp != 0) {
+            videoRef.current!.currentTime = cachedTimestamp;
           }
           videoRef.current
             ?.play()
@@ -160,6 +159,10 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
       if (playerRef.current) {
         playerRef.current.destroy();
         playerRef.current = null;
+      }
+      if (nextPlayerRef.current) {
+        nextPlayerRef.current.destroy();
+        nextPlayerRef.current = null;
       }
       updateHistory();
     };
@@ -216,6 +219,22 @@ function WatchContent({ id, epid }: { id: string; epid: string }) {
       handleSeekBackward();
     } else if (e.code === 'ArrowRight') {
       handleSeekForward();
+    } else if (e.code === 'BracketLeft') {
+      // Previous episode
+      if (anime && episode && episode.index > 0) {
+        const prevEp = anime.episodes[episode.index - 1];
+        if (prevEp) {
+          navigate(`/watch/${anime.id}/${prevEp.id}`);
+        }
+      }
+    } else if (e.code === 'BracketRight') {
+      // Next episode
+      if (anime && episode && episode.index < anime.episodes.length - 1) {
+        const nextEp = anime.episodes[episode.index + 1];
+        if (nextEp) {
+          navigate(`/watch/${anime.id}/${nextEp.id}`);
+        }
+      }
     }
   };
 
